@@ -10,6 +10,8 @@ android/captures/
 *.aab
 *.keystore
 *.jks
+# Contest deliverable: the signed release APK is committed (signing key is not).
+!apk/*.apk
 
 # Secrets
 .env
