@@ -27,6 +27,9 @@ DriveSync는 내비게이션 목적지·잔여 시간(ETA)과 플랫폼의 주�
 | 기술 활용성 | LLM은 서버 경유로만 호출, 입·출력 스키마 검증. 항목마다 **[내 기록] / [AI 추론]** 구분. **항목별로 승인한 작업만 실행**, 같은 실행 키로 1회만 발송, 실패는 `Failed → Retry` |
 | 사업성 | 검증되지 않은 수치는 가설로 표기. 인터뷰 가이드·검증 지표·로드맵 준비 ([기획서](docs/planning/proposal.md#4-사업성)) |
 
+**자동 테스트 71개**가 push마다 기획서의 약속을 검증합니다: 주행 제한 중 금지 기능 접근 0건 · 승인 없는 실행 0건 · 중복 발송 0건 · 스키마 위반 결과 표시 0건 · 표기 원칙(상단 바·출처 배지·시뮬레이션 배지·개인정보) 위반 0건.
+(웹 프로토타입 14 · 차량 앱 Kotlin 42 · 서버 15) → 근거 상세: [`docs/judging.md`](docs/judging.md)
+
 ## 제출물 안내 (공모전 제출 요건)
 
 | 요건 | 내용 |
@@ -53,7 +56,7 @@ DriveSync는 내비게이션 목적지·잔여 시간(ETA)과 플랫폼의 주�
 
 | 구분 | 버전 · 조건 |
 |---|---|
-| 차량 앱 (Kotlin) | JDK 17 이상 (CI는 Temurin 21) · Kotlin 2.1.21 · AGP 8.10.1 · Gradle 8.14.3(wrapper) · Android SDK Platform 35 + Build-Tools 35.0.0 · `compileSdk 35` / `minSdk 31` / `targetSdk 35` |
+| 차량 앱 (Kotlin) | JDK 17 이상 (CI는 Temurin 21) · Kotlin 2.1.21 · AGP 8.10.1 · Gradle 8.14.3(wrapper) · Android SDK Platform 35 + Build-Tools 35.0.0 이상 · `compileSdk 35` / `minSdk 31` / `targetSdk 35` |
 | 웹 시연 프로토타입 | Node.js 22 이상 · Vite + React + TypeScript(strict) · Chrome/Edge 최신 버전 |
 | 서버 함수 | Deno 2 · Supabase CLI (로컬 스택을 띄울 때만) |
 | 자동 테스트 | 웹 14 · 차량 앱 Kotlin 42 · 서버 15 = **71개** (`npm run ci` · `./gradlew test` · `deno task ci`) |
@@ -85,9 +88,6 @@ DriveSync는 내비게이션 목적지·잔여 시간(ETA)과 플랫폼의 주�
 - 빌드 소스: 커밋 `77d68c1`(android/ 소스 기준). 빌드 결과: **23.4 MB (24,556,804 bytes)** · SHA-256 `cb85fc218e0c73347a70f8b36508039eee48cba9b8231147ed1c02592f0b45eb` · GitHub Actions `Android app` → `release` job에서 `apksigner verify` 통과(APK Signature Scheme v2, 서명자 1, RSA 4096).
 - 서명 키는 **저장소에 커밋하지 않습니다**. CI(`Android app` → `release` job)가 `apksigner verify`로 서명을 확인하고, 키를 Secrets(`DRIVESYNC_KEYSTORE_BASE64`·`DRIVESYNC_KEYSTORE_PASSWORD`·`DRIVESYNC_KEY_ALIAS`·`DRIVESYNC_KEY_PASSWORD`)로 주면 그 키로, 없으면 실행마다 임시 키로 서명합니다.
 - 설치: `adb install -r apk/DriveSync_DriveSync_release.apk` (Android Automotive 12+ / `android.hardware.type.automotive` 필요). 빌드에 서버 주소가 없으면 앱은 `DemoSeed` 가상 데이터와 시뮬레이터 패널로 동작하며 모든 화면에 `시뮬레이션 데이터` 배지가 붙습니다.
-
-**자동 테스트 71개**가 push마다 기획서의 약속을 검증합니다: 주행 제한 중 금지 기능 접근 0건 · 승인 없는 실행 0건 · 중복 발송 0건 · 스키마 위반 결과 표시 0건 · 표기 원칙(상단 바·출처 배지·시뮬레이션 배지·개인정보) 위반 0건.
-(웹 프로토타입 14 · 차량 앱 Kotlin 42 · 서버 15) → 근거 상세: [`docs/judging.md`](docs/judging.md)
 
 ## 웹 시연 프로토타입 실행 (3분)
 
