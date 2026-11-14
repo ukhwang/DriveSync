@@ -1,0 +1,4 @@
+-keepattributes *Annotation*, InnerClasses
+-keep,includedescriptorclasses class com.drivesync.**$$serializer { *; }
+-keepclassmembers class com.drivesync.** { *** Companion; }
+-keepclasseswithmembers class com.drivesync.** { kotlinx.serialization.KSerializer serializer(...); }

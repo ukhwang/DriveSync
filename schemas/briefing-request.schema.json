@@ -1,0 +1,31 @@
+{
+  "$id": "https://drivesync.app/schemas/briefing-request.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "visitId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100
+    },
+    "etaMinutes": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 600
+    },
+    "tier": {
+      "type": "string",
+      "enum": [
+        "short",
+        "medium",
+        "long"
+      ]
+    }
+  },
+  "required": [
+    "visitId",
+    "etaMinutes",
+    "tier"
+  ],
+  "additionalProperties": false
+}

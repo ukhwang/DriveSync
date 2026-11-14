@@ -1,0 +1,52 @@
+# Supabase local stack (supabase start). Hosted projects: see docs/backend.md.
+project_id = "drivesync"
+
+[api]
+enabled = true
+port = 54321
+schemas = ["public"]
+max_rows = 1000
+
+[db]
+port = 54322
+major_version = 15
+
+[db.seed]
+enabled = true
+sql_paths = ["./seed.sql"]
+
+[auth]
+enabled = true
+site_url = "http://localhost:54321"
+jwt_expiry = 3600
+enable_signup = true
+
+[auth.email]
+enable_signup = true
+enable_confirmations = false
+
+[edge_runtime]
+enabled = true
+policy = "per_worker"
+deno_version = 2
+
+# Every function requires a valid user JWT at the gateway, then re-checks it in code.
+[functions.generate-briefing]
+verify_jwt = true
+import_map = "./functions/deno.json"
+
+[functions.generate-insight]
+verify_jwt = true
+import_map = "./functions/deno.json"
+
+[functions.extract-actions]
+verify_jwt = true
+import_map = "./functions/deno.json"
+
+[functions.execute-action]
+verify_jwt = true
+import_map = "./functions/deno.json"
+
+[functions.record-consent]
+verify_jwt = true
+import_map = "./functions/deno.json"

@@ -1,0 +1,26 @@
+{
+  "$id": "https://drivesync.app/schemas/insight-request.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "visitId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100
+    },
+    "travelNotes": {
+      "maxItems": 30,
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 1000
+      }
+    }
+  },
+  "required": [
+    "visitId",
+    "travelNotes"
+  ],
+  "additionalProperties": false
+}

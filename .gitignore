@@ -1,0 +1,29 @@
+# Gradle / Android
+android/.gradle/
+android/build/
+android/**/build/
+android/local.properties
+android/.idea/
+android/**/*.iml
+android/captures/
+*.apk
+*.aab
+*.keystore
+*.jks
+
+# Secrets
+.env
+.env.*
+!.env.example
+supabase/functions/.env
+supabase/.temp/
+supabase/.branches/
+
+# OS / editors
+.DS_Store
+.vscode/
+*.log
+
+# Web prototype
+prototype/node_modules/
+prototype/dist/

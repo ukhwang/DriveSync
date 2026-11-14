@@ -1,0 +1,10 @@
+# Copy to android/local.properties (git-ignored).
+sdk.dir=/path/to/Android/sdk
+SUPABASE_URL=http://10.0.2.2:54321
+SUPABASE_ANON_KEY=
+DRIVESYNC_DEMO_EMAIL=demo@drivesync.example
+DRIVESYNC_DEMO_PASSWORD=drivesync-demo
+# Max length of one voice memo in seconds (default 120 = 2 minutes; ends earlier on 3 s of silence)
+DRIVESYNC_MEMO_MAX_SECONDS=120
+# true = real CarUxRestrictions / CarPropertyManager; false = simulator panel
+DRIVESYNC_USE_CAR_API=false

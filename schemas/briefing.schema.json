@@ -1,0 +1,68 @@
+{
+  "$id": "https://drivesync.app/schemas/briefing.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "tier": {
+      "type": "string",
+      "enum": [
+        "short",
+        "medium",
+        "long"
+      ]
+    },
+    "screenLines": {
+      "minItems": 1,
+      "maxItems": 8,
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 120
+      }
+    },
+    "voiceScript": {
+      "minItems": 1,
+      "maxItems": 20,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "text": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "core": {
+            "type": "boolean",
+            "description": "core sentences survive when the remaining ETA is too short"
+          }
+        },
+        "required": [
+          "text",
+          "core"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "preArrivalRecap": {
+      "anyOf": [
+        {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "required": [
+    "tier",
+    "screenLines",
+    "voiceScript",
+    "preArrivalRecap"
+  ],
+  "additionalProperties": false
+}

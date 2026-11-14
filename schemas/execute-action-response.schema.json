@@ -1,0 +1,22 @@
+{
+  "$id": "https://drivesync.app/schemas/execute-action-response.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "status": {
+      "type": "string",
+      "enum": [
+        "executed",
+        "already_executed"
+      ]
+    },
+    "log": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "status",
+    "log"
+  ],
+  "additionalProperties": false
+}
