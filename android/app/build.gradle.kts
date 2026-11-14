@@ -13,6 +13,12 @@ val localProps = Properties().apply {
 }
 fun config(name: String): String = localProps.getProperty(name) ?: System.getenv(name) ?: ""
 
+// Release keystore lives outside the repository (git-ignored, e.g. /tmp or CI runner temp).
+val releaseKeystore = config("DRIVESYNC_KEYSTORE_PATH")
+    .takeIf { it.isNotBlank() }
+    ?.let { file(it) }
+    ?.takeIf { it.exists() }
+
 android {
     namespace = "com.drivesync.app"
     compileSdk = 35
@@ -41,10 +47,25 @@ android {
         buildConfig = true
     }
 
+    // Release signing is never committed. Point DRIVESYNC_KEYSTORE_PATH (local.properties or env)
+    // at a keystore outside the repository; CI generates an ephemeral one per build.
+    // When it is unset the release build simply stays unsigned, so normal CI/debug work is unaffected.
+    signingConfigs {
+        if (releaseKeystore != null) {
+            create("release") {
+                storeFile = releaseKeystore
+                storePassword = config("DRIVESYNC_KEYSTORE_PASSWORD")
+                keyAlias = config("DRIVESYNC_KEY_ALIAS").ifEmpty { "drivesync" }
+                keyPassword = config("DRIVESYNC_KEY_PASSWORD").ifEmpty { config("DRIVESYNC_KEYSTORE_PASSWORD") }
+            }
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            signingConfig = signingConfigs.findByName("release")
         }
     }
 
