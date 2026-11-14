@@ -64,7 +64,7 @@ DriveSync는 내비게이션 목적지·잔여 시간(ETA)과 플랫폼의 주�
 |---|---|---|
 | `SUPABASE_URL` / `SUPABASE_ANON_KEY` | (빈 값) | 서버 함수 주소. 비워 두면 로컬 Supabase(`http://localhost:54321`)를 보고, 서버가 없으면 가상 데이터로 동작 |
 | `DRIVESYNC_DEMO_EMAIL` / `DRIVESYNC_DEMO_PASSWORD` | (빈 값) | 시연 계정. 비어 있으면 로그인 단계를 건너뜁니다 |
-| `DRIVESYNC_MEMO_MAX_SECONDS` | `120` | 단발성 음성 메모 최대 길이(초). 설정 화면에서 변경 가능하며 발화가 끝나면 자동 저장 |
+| `DRIVESYNC_MEMO_MAX_SECONDS` | `120` | 단발성 음성 메모 최대 길이(초). 빌드 설정(local.properties·환경변수)으로 변경할 수 있고, 발화가 끝나면 자동 저장합니다 |
 | `DRIVESYNC_USE_CAR_API` | `false` | `true`면 실제 `CarUxRestrictions`/`CarPropertyManager`, `false`면 시뮬레이터 패널(화면에 시뮬레이션 배지) |
 | `DRIVESYNC_KEYSTORE_PATH` · `DRIVESYNC_KEYSTORE_PASSWORD` · `DRIVESYNC_KEY_ALIAS` · `DRIVESYNC_KEY_PASSWORD` | (빈 값) | 릴리스 서명 키. **저장소에 포함하지 않습니다** ([APK](#apk-release)) |
 | `sdk.dir` | — | Android SDK 경로 ([`android/local.properties.example`](android/local.properties.example)) |
