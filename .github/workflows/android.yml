@@ -7,6 +7,9 @@ on:
   pull_request:
     paths: ["android/**", ".github/workflows/android.yml"]
 
+permissions:
+  contents: read
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -28,3 +31,83 @@ jobs:
           name: drivesync-debug-apk
           path: android/app/build/outputs/apk/debug/*.apk
           retention-days: 14
+
+  # Signed, installable release APK for contest submission.
+  # The signing keystore is never committed to the repository:
+  #  - if DRIVESYNC_KEYSTORE_BASE64 is set as a repository secret, that key is used;
+  #  - otherwise an ephemeral keystore is generated inside the runner and discarded.
+  release:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    defaults:
+      run:
+        working-directory: android
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Prepare release signing key (ephemeral unless a secret is configured)
+        env:
+          KEYSTORE_BASE64: ${{ secrets.DRIVESYNC_KEYSTORE_BASE64 }}
+          SECRET_ALIAS: ${{ secrets.DRIVESYNC_KEY_ALIAS }}
+          SECRET_STORE_PASSWORD: ${{ secrets.DRIVESYNC_KEYSTORE_PASSWORD }}
+          SECRET_KEY_PASSWORD: ${{ secrets.DRIVESYNC_KEY_PASSWORD }}
+        run: |
+          set -euo pipefail
+          KEYSTORE_PATH="$RUNNER_TEMP/drivesync-release.jks"
+
+          if [ -n "${KEYSTORE_BASE64:-}" ]; then
+            printf '%s' "$KEYSTORE_BASE64" | base64 -d > "$KEYSTORE_PATH"
+            ALIAS="${SECRET_ALIAS:-drivesync}"
+            STORE_PASS="${SECRET_STORE_PASSWORD:?DRIVESYNC_KEYSTORE_PASSWORD is required with a signed keystore}"
+            KEY_PASS="${SECRET_KEY_PASSWORD:-$STORE_PASS}"
+          else
+            ALIAS="drivesync"
+            STORE_PASS="$(openssl rand -hex 24)"
+            KEY_PASS="$STORE_PASS"
+            echo "::add-mask::$STORE_PASS"
+            keytool -genkeypair -noprompt \
+              -keystore "$KEYSTORE_PATH" -alias "$ALIAS" \
+              -keyalg RSA -keysize 4096 -validity 10000 \
+              -storetype PKCS12 -storepass "$STORE_PASS" -keypass "$KEY_PASS" \
+              -dname "CN=DriveSync, OU=Vehicle App Challenge, O=DriveSync, C=KR"
+            echo "Ephemeral release key generated; it is not stored anywhere."
+          fi
+
+          {
+            echo "DRIVESYNC_KEYSTORE_PATH=$KEYSTORE_PATH"
+            echo "DRIVESYNC_KEY_ALIAS=$ALIAS"
+            echo "DRIVESYNC_KEYSTORE_PASSWORD=$STORE_PASS"
+            echo "DRIVESYNC_KEY_PASSWORD=$KEY_PASS"
+          } >> "$GITHUB_ENV"
+
+      - name: Assemble signed release APK
+        run: ./gradlew assembleRelease --no-daemon
+
+      - name: Verify the APK is signed and well formed
+        run: |
+          set -euo pipefail
+          APK=app/build/outputs/apk/release/app-release.apk
+          test -s "$APK" || { echo "release APK missing"; exit 1; }
+          APKSIGNER="$(find "$ANDROID_HOME/build-tools" -maxdepth 2 -name apksigner -type f | sort -V | tail -1)"
+          echo "apksigner: $APKSIGNER"
+          "$APKSIGNER" verify --verbose --print-certs "$APK"
+          unzip -l "$APK" > "$RUNNER_TEMP/apk-contents.txt"
+          grep -q 'classes.dex' "$RUNNER_TEMP/apk-contents.txt"
+          grep -q 'AndroidManifest.xml' "$RUNNER_TEMP/apk-contents.txt"
+          ls -lh "$APK"
+          cp "$APK" "$RUNNER_TEMP/DriveSync_DriveSync_release.apk"
+          sha256sum "$RUNNER_TEMP/DriveSync_DriveSync_release.apk" | tee "$RUNNER_TEMP/apk-sha256.txt"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: drivesync-release-apk
+          path: |
+            ${{ runner.temp }}/DriveSync_DriveSync_release.apk
+            ${{ runner.temp }}/apk-sha256.txt
+          retention-days: 7
