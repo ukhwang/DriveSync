@@ -82,7 +82,7 @@ DriveSync는 내비게이션 목적지·잔여 시간(ETA)과 플랫폼의 주�
 ## APK (release)
 
 - 위치: [`apk/DriveSync_DriveSync_release.apk`](apk/DriveSync_DriveSync_release.apk) — 공모전 제출용 release 빌드(R8 minify 적용, release 키로 서명).
-- 빌드 결과: **23.4 MB (24,556,804 bytes)** · SHA-256 `cb85fc218e0c73347a70f8b36508039eee48cba9b8231147ed1c02592f0b45eb` · GitHub Actions `Android app` → `release` job에서 `apksigner verify` 통과(APK Signature Scheme v2, 서명자 1, RSA 4096).
+- 빌드 소스: 커밋 `77d68c1`(android/ 소스 기준). 빌드 결과: **23.4 MB (24,556,804 bytes)** · SHA-256 `cb85fc218e0c73347a70f8b36508039eee48cba9b8231147ed1c02592f0b45eb` · GitHub Actions `Android app` → `release` job에서 `apksigner verify` 통과(APK Signature Scheme v2, 서명자 1, RSA 4096).
 - 서명 키는 **저장소에 커밋하지 않습니다**. CI(`Android app` → `release` job)가 `apksigner verify`로 서명을 확인하고, 키를 Secrets(`DRIVESYNC_KEYSTORE_BASE64`·`DRIVESYNC_KEYSTORE_PASSWORD`·`DRIVESYNC_KEY_ALIAS`·`DRIVESYNC_KEY_PASSWORD`)로 주면 그 키로, 없으면 실행마다 임시 키로 서명합니다.
 - 설치: `adb install -r apk/DriveSync_DriveSync_release.apk` (Android Automotive 12+ / `android.hardware.type.automotive` 필요). 빌드에 서버 주소가 없으면 앱은 `DemoSeed` 가상 데이터와 시뮬레이터 패널로 동작하며 모든 화면에 `시뮬레이션 데이터` 배지가 붙습니다.
 
