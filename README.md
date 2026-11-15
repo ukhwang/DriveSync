@@ -85,7 +85,7 @@ DriveSync는 내비게이션 목적지·잔여 시간(ETA)과 플랫폼의 주�
 ## APK (release)
 
 - 위치: [`apk/DriveSync_DriveSync_release.apk`](apk/DriveSync_DriveSync_release.apk) — 공모전 제출용 release 빌드(R8 minify 적용, release 키로 서명).
-- 빌드 소스: 커밋 `2990683`(android/ 소스 기준). 빌드 결과: **23.4 MB (24,556,804 bytes)** · SHA-256 `c09a349588612c7c34ffa5f00adf9b4518ed61dbe869ef66a88724dbea8715e0` · GitHub Actions `Android app` → `release` job에서 `apksigner verify` 통과.
+- 빌드 소스: 커밋 `67ea68b`(android/ 소스 기준). 빌드 결과: **23.4 MB (24,556,804 bytes)** · SHA-256 `c09a349588612c7c34ffa5f00adf9b4518ed61dbe869ef66a88724dbea8715e0` · GitHub Actions `Android app` → `release` job에서 `apksigner verify` 통과.
 - 서명 키는 **저장소에 커밋하지 않습니다**. CI(`Android app` → `release` job)가 `apksigner verify`로 서명을 확인하고, 키를 Secrets(`DRIVESYNC_KEYSTORE_BASE64`·`DRIVESYNC_KEYSTORE_PASSWORD`·`DRIVESYNC_KEY_ALIAS`·`DRIVESYNC_KEY_PASSWORD`)로 주면 그 키로, 없으면 실행마다 임시 키로 서명합니다. 임시 키 빌드끼리는 서명이 달라 덮어쓰기 설치가 거부되므로, 이전 빌드가 설치돼 있으면 먼저 `adb uninstall com.drivesync.app` 하세요.
 - 설치: `adb install apk/DriveSync_DriveSync_release.apk` (Android Automotive 12+ / `android.hardware.type.automotive` 필요, 일반 휴대폰에는 설치되지 않습니다).
 
