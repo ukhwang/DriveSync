@@ -27,8 +27,8 @@ DriveSync는 내비게이션 목적지·잔여 시간(ETA)과 플랫폼의 주�
 | 기술 활용성 | LLM은 서버 경유로만 호출, 입·출력 스키마 검증. 항목마다 **[내 기록] / [AI 추론]** 구분. **항목별로 승인한 작업만 실행**, 같은 실행 키로 1회만 발송, 실패는 `Failed → Retry` |
 | 사업성 | 검증되지 않은 수치는 가설로 표기. 인터뷰 가이드·검증 지표·로드맵 준비 ([기획서](docs/planning/proposal.md#4-사업성)) |
 
-**자동 테스트 71개**가 push마다 기획서의 약속을 검증합니다: 주행 제한 중 금지 기능 접근 0건 · 승인 없는 실행 0건 · 중복 발송 0건 · 스키마 위반 결과 표시 0건 · 표기 원칙(상단 바·출처 배지·시뮬레이션 배지·개인정보) 위반 0건.
-(웹 프로토타입 14 · 차량 앱 Kotlin 42 · 서버 15) → 근거 상세: [`docs/judging.md`](docs/judging.md)
+**자동 테스트 78개**가 push마다 기획서의 약속을 검증합니다: 주행 제한 중 금지 기능 접근 0건 · 승인 없는 실행 0건 · 중복 발송 0건 · 스키마 위반 결과 표시 0건 · 표기 원칙(상단 바·출처 배지·시뮬레이션 배지·개인정보) 위반 0건.
+(웹 프로토타입 14 · 차량 앱 Kotlin 49 · 서버 15) → 근거 상세: [`docs/judging.md`](docs/judging.md)
 
 ## 제출물 안내 (공모전 제출 요건)
 
@@ -59,15 +59,15 @@ DriveSync는 내비게이션 목적지·잔여 시간(ETA)과 플랫폼의 주�
 | 차량 앱 (Kotlin) | JDK 17 이상 (CI는 Temurin 21) · Kotlin 2.1.21 · AGP 8.10.1 · Gradle 8.14.3(wrapper) · Android SDK Platform 35 + Build-Tools 35.0.0 이상 · `compileSdk 35` / `minSdk 31` / `targetSdk 35` |
 | 웹 시연 프로토타입 | Node.js 22 이상 · Vite + React + TypeScript(strict) · Chrome/Edge 최신 버전 |
 | 서버 함수 | Deno 2 · Supabase CLI (로컬 스택을 띄울 때만) |
-| 자동 테스트 | 웹 14 · 차량 앱 Kotlin 42 · 서버 15 = **71개** (`npm run ci` · `./gradlew test` · `deno task ci`) |
+| 자동 테스트 | 웹 14 · 차량 앱 Kotlin 49 · 서버 15 = **78개** (`npm run ci` · `./gradlew test` · `deno task ci`) |
 
-설정은 `android/local.properties`(저장소 제외)에 둡니다. 서버 없이 화면만 보려면 비워 두면 됩니다.
+설정은 `android/local.properties`(저장소 제외)에 둡니다. 모두 비워 두면 서버 없이 **오프라인 시연 모드**로 5단계 전체 흐름이 동작합니다([APK](#apk-release) 참고).
 
 | 키 | 기본값 | 설명 |
 |---|---|---|
-| `SUPABASE_URL` / `SUPABASE_ANON_KEY` | (빈 값) | 서버 함수 주소. 비워 두면 로컬 Supabase(`http://localhost:54321`)를 보고, 서버가 없으면 가상 데이터로 동작 |
+| `SUPABASE_URL` / `SUPABASE_ANON_KEY` | (빈 값) | 서버 함수 주소. **비워 두면 오프라인 시연 모드**: 브리핑·치트시트·후속 작업 추출을 기기 안에서 가상 데이터로 만들고(서버와 같은 스키마 검증 통과), 발송은 시뮬레이션 실행기가 처리합니다(실제 메일 발송 없음). 로컬 Supabase를 쓰려면 에뮬레이터 기준 `http://10.0.2.2:54321`처럼 주소를 직접 넣습니다 |
 | `DRIVESYNC_DEMO_EMAIL` / `DRIVESYNC_DEMO_PASSWORD` | (빈 값) | 시연 계정. 비어 있으면 로그인 단계를 건너뜁니다 |
-| `DRIVESYNC_MEMO_MAX_SECONDS` | `120` | 단발성 음성 메모 최대 길이(초). 빌드 설정(local.properties·환경변수)으로 변경할 수 있고, 발화가 끝나면 자동 저장합니다 |
+| `DRIVESYNC_MEMO_MAX_SECONDS` | `120` | 단발성 음성 메모 최대 길이(초). 앱 설정 화면이 아니라 **빌드 설정**(local.properties·환경변수)으로 바꿉니다. 발화가 끝나면 자동 저장합니다 |
 | `DRIVESYNC_USE_CAR_API` | `false` | `true`면 실제 `CarUxRestrictions`/`CarPropertyManager`, `false`면 시뮬레이터 패널(화면에 시뮬레이션 배지) |
 | `DRIVESYNC_KEYSTORE_PATH` · `DRIVESYNC_KEYSTORE_PASSWORD` · `DRIVESYNC_KEY_ALIAS` · `DRIVESYNC_KEY_PASSWORD` | (빈 값) | 릴리스 서명 키. **저장소에 포함하지 않습니다** ([APK](#apk-release)) |
 | `sdk.dir` | — | Android SDK 경로 ([`android/local.properties.example`](android/local.properties.example)) |
@@ -85,9 +85,24 @@ DriveSync는 내비게이션 목적지·잔여 시간(ETA)과 플랫폼의 주�
 ## APK (release)
 
 - 위치: [`apk/DriveSync_DriveSync_release.apk`](apk/DriveSync_DriveSync_release.apk) — 공모전 제출용 release 빌드(R8 minify 적용, release 키로 서명).
-- 빌드 소스: 커밋 `77d68c1`(android/ 소스 기준). 빌드 결과: **23.4 MB (24,556,804 bytes)** · SHA-256 `cb85fc218e0c73347a70f8b36508039eee48cba9b8231147ed1c02592f0b45eb` · GitHub Actions `Android app` → `release` job에서 `apksigner verify` 통과(APK Signature Scheme v2, 서명자 1, RSA 4096).
-- 서명 키는 **저장소에 커밋하지 않습니다**. CI(`Android app` → `release` job)가 `apksigner verify`로 서명을 확인하고, 키를 Secrets(`DRIVESYNC_KEYSTORE_BASE64`·`DRIVESYNC_KEYSTORE_PASSWORD`·`DRIVESYNC_KEY_ALIAS`·`DRIVESYNC_KEY_PASSWORD`)로 주면 그 키로, 없으면 실행마다 임시 키로 서명합니다.
-- 설치: `adb install -r apk/DriveSync_DriveSync_release.apk` (Android Automotive 12+ / `android.hardware.type.automotive` 필요). 빌드에 서버 주소가 없으면 앱은 `DemoSeed` 가상 데이터와 시뮬레이터 패널로 동작하며 모든 화면에 `시뮬레이션 데이터` 배지가 붙습니다.
+- 빌드 소스: 커밋 `__BUILD_COMMIT__`(android/ 소스 기준). 빌드 결과: **__APK_MB__ MB (__APK_BYTES__ bytes)** · SHA-256 `__APK_SHA256__` · GitHub Actions `Android app` → `release` job에서 `apksigner verify` 통과.
+- 서명 키는 **저장소에 커밋하지 않습니다**. CI(`Android app` → `release` job)가 `apksigner verify`로 서명을 확인하고, 키를 Secrets(`DRIVESYNC_KEYSTORE_BASE64`·`DRIVESYNC_KEYSTORE_PASSWORD`·`DRIVESYNC_KEY_ALIAS`·`DRIVESYNC_KEY_PASSWORD`)로 주면 그 키로, 없으면 실행마다 임시 키로 서명합니다. 임시 키 빌드끼리는 서명이 달라 덮어쓰기 설치가 거부되므로, 이전 빌드가 설치돼 있으면 먼저 `adb uninstall com.drivesync.app` 하세요.
+- 설치: `adb install apk/DriveSync_DriveSync_release.apk` (Android Automotive 12+ / `android.hardware.type.automotive` 필요, 일반 휴대폰에는 설치되지 않습니다).
+
+### 이 APK가 보여주는 것 (오프라인 시연 모드)
+
+제출 APK에는 서버 주소가 들어 있지 않아 **오프라인 시연 모드**로 동작합니다. 모든 화면에 `시뮬레이션` 배지가 붙고, 기기 밖으로 나가는 데이터는 없습니다.
+
+| 단계 | APK에서 동작 방식 |
+|---|---|
+| 차량 신호 | 오른쪽 **시뮬레이터 패널**로 `CarUxRestrictions` 활성/해제·기어 P/D·신호 오류를 재현합니다(`DRIVESYNC_USE_CAR_API=false`). 실제 `CarUxRestrictionsManager` 연동 코드는 `true` 빌드에 있고, Pleos SDK 수령 후 실연동 예정입니다 |
+| ① 브리핑 | ETA 구간(30초/1분/2분)에 맞춘 브리핑을 `DemoSeed` 가상 고객 데이터로 만들고, 서버와 같은 계약(`ContractValidator`)을 통과한 결과만 표시합니다 |
+| ② 이동 중 메모 | 기기 STT로 메모를 남기고 세션에 누적합니다(주행 중 STT 허용 범위 확인 전에는 정차 입력으로 대체) |
+| ③ 치트시트 | 핵심 3줄·우려사항·예상 질문을 만들고, 이동 중 메모는 `[내 기록]`, 생성 문장은 `[AI 추론]`으로 표시합니다 |
+| ④ 디브리핑 → 후속 작업 | 디브리핑 원문으로 고객 메일·사내 보고 메일 초안 2건을 `Draft`로 만듭니다. 승인하지 않으면 실행되지 않습니다 |
+| ⑤ 실행·재시도 | **앱 실행 후 첫 발송 1회는 "통신 음영(지하주차장 시뮬레이션)"으로 일부러 실패**합니다 → `다음 정차 때 재시도` → `다시 승인` → `실행 · 발송` 순서로 같은 실행 키로 1회만 실행됩니다. 실제 메일은 보내지 않습니다 |
+
+LLM 생성과 실제 메일 발송은 서버(`supabase/functions`) 경로에서만 일어나며, 그 경로는 서버 테스트 15개로 검증합니다. 일정 등록(Calendar) 후속 작업은 **웹 시연 프로토타입에서만 시뮬레이션**되며, 차량 앱·서버의 후속 작업 타입은 현재 이메일입니다(일정 액션은 로드맵의 11/27~30 연동 범위).
 
 ## 웹 시연 프로토타입 실행 (3분)
 
@@ -123,11 +138,13 @@ npm run ci
 |---|---|---|---|
 | 01 | **출발 전 브리핑** (정차) | 목적지·ETA 18분 확인 → `주행 브리핑 준비 완료` | 상단 바 `CarUxRestrictions 해제 + P단` · ETA 18분 → "중거리 브리핑(1분)" 자동 매칭 · 카드마다 `[내 기록]`/`[AI 추론]` |
 | 02 | **이동 중 브리핑 재생** (주행 제한) | `일시정지` ↔ `계속 재생`, `중지` 눌러보기 → `음성 메모 (1-Tap)` | 상단 바 `CarUxRestrictions 활성 · D단 주행 제한` · 화면에는 목적지·ETA·재생 제어·메모 버튼만 · 일방향 재생(질문 없음) |
-| 03 | **단발성 음성 메모** (주행 제한) | 그대로 두면 녹음 → 약 8초 뒤 `저장됨` | 원형 음파 + "최대 2분"만 표시(설정으로 변경 가능, 말이 끝나면 자동 저장, 남은 시간은 마지막 15초만) · **주행 중에는 전사문·AI 분류·꼬리질문 없음**, 확인음만 |
+| 03 | **단발성 음성 메모** (주행 제한) | 그대로 두면 녹음 → 약 8초 뒤 `저장됨` | 원형 음파 + "최대 2분"만 표시(빌드 설정으로 변경 가능, 말이 끝나면 자동 저장, 남은 시간은 마지막 15초만) · **주행 중에는 전사문·AI 분류·꼬리질문 없음**, 확인음만 |
 | 04 | **도착 후 미팅 치트시트** (정차 · P단) | 좌우 화살표로 원기둥 회전 → 가운데 카드 탭 → `내용 수정` | 3D 원기둥 캐러셀: 핵심 3줄 / 우려사항 / 예상 질문 / 이동 중 메모 · 줄마다 출처 배지(수정한 AI 줄은 `[내 기록]`으로 바뀜) · **승인·발송 버튼 없음** |
 | 05 | **디브리핑 + 개별 승인** (정차) | 메일 `검토 시작` → 본문 수정 → `이 항목 승인`, 일정도 같은 방법 → `승인된 N건 실행` | 왼쪽 디브리핑 원문 `[내 기록]` · 오른쪽 메일·일정이 각각 `Draft → Review → Approved` · 승인 0건이면 실행 버튼 비활성 · 승인 후 수정하면 다시 Review(버전 +1) |
 | 06 | **실행 결과 + 오프라인 재시도** (정차) | 실패 카드 `다시 승인 후 재시도` → `연결 복구 (시뮬레이션)` | 메일 `Executed` · 지하주차장에서 일정 등록 `Failed` → 다시 승인 → `Retry` → `Executed` · **같은 실행 키**(`ds-a-calendar:v1`) 재사용 |
 | 07 | **신호 오류 안전 잠금** | 탭만 전환 | `PAUSED_BY_POLICY` · 조작 잠금 · 세션은 암호화 로컬 저장소에 보존 |
+
+> 웹 프로토타입의 `일정` 후속 작업(05·06)은 화면 시연용 시뮬레이션입니다. 차량 앱(Kotlin)·서버에 구현된 후속 작업 타입은 현재 **이메일**이며, 일정 등록은 로드맵의 연동 범위입니다.
 
 | | | |
 |---|---|---|
@@ -193,7 +210,8 @@ cd supabase/functions && deno task ci
 | 판단 규칙(안전 정책·상태 머신·ETA 브리핑·승인 엔진) + 테스트 | 완료 |
 | 서버(LLM 프록시·스키마 검증·사용량 제한·동의·메일 발송 API) + 테스트 | 완료 (호스팅 배포 전) |
 | 7개 상태 웹 시연 프로토타입 | 완료 |
-| Kotlin 차량 앱 빌드 | CI 통과 · release APK 서명 빌드 완료([`apk/`](apk/)), Pleos Connect 에뮬레이터 구동 검증 예정 |
+| Kotlin 차량 앱 빌드 | CI 통과 · release APK 서명 빌드 완료([`apk/`](apk/)) · 서버 없이 5단계를 도는 오프라인 시연 모드 포함, Pleos Connect 에뮬레이터 구동 검증 예정 |
+| 일정 등록(Calendar) 후속 작업 | 웹 프로토타입 시뮬레이션만 구현 · 차량 앱·서버 연동은 11/27~30 예정 |
 | Pleos 전용 SDK(NaviHelper·STT·TTS) 연결 | SDK 수령 후 |
 | 현직자 예비 인터뷰 · 시나리오 테스트 | 예정 ([가이드](docs/interviews/README.md)) |
 

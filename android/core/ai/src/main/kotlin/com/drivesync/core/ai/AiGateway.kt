@@ -59,18 +59,7 @@ class EdgeFunctionAiGateway(private val client: EdgeFunctionClient) : AiGateway 
             ExtractActionsResponse.serializer(),
         ).validate(ContractValidator::extractedActions)
         if (result !is EdgeResult.Success) return result.mapFailure()
-        return EdgeResult.Success(
-            result.value.actions.map {
-                FollowUpAction(
-                    id = it.id,
-                    sessionId = request.sessionId,
-                    customerId = customerId,
-                    type = it.type,
-                    draft = it.draft,
-                    status = ActionStatus.DRAFT,
-                )
-            },
-        )
+        return EdgeResult.Success(result.value.toFollowUps(request.sessionId, customerId))
     }
 
     override suspend fun recordConsent(granted: Boolean): EdgeResult<Unit> {
@@ -79,14 +68,27 @@ class EdgeFunctionAiGateway(private val client: EdgeFunctionClient) : AiGateway 
     }
 }
 
-private inline fun <T> EdgeResult<T>.validate(check: (T) -> List<String>): EdgeResult<T> {
+internal inline fun <T> EdgeResult<T>.validate(check: (T) -> List<String>): EdgeResult<T> {
     if (this !is EdgeResult.Success) return this
     val problems = check(value)
     return if (problems.isEmpty()) this else EdgeResult.SchemaRejected(problems.joinToString("; "))
 }
 
 @Suppress("UNCHECKED_CAST")
-private fun <T> EdgeResult<*>.mapFailure(): EdgeResult<T> {
+internal fun <T> EdgeResult<*>.mapFailure(): EdgeResult<T> {
     check(this !is EdgeResult.Success) { "mapFailure called on success" }
     return this as EdgeResult<T>
 }
+
+/** Extracted actions always start as DRAFT: nothing runs without the 6-state approval flow. */
+internal fun ExtractActionsResponse.toFollowUps(sessionId: String, customerId: String): List<FollowUpAction> =
+    actions.map {
+        FollowUpAction(
+            id = it.id,
+            sessionId = sessionId,
+            customerId = customerId,
+            type = it.type,
+            draft = it.draft,
+            status = ActionStatus.DRAFT,
+        )
+    }

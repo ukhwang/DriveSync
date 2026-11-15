@@ -111,6 +111,9 @@ class DriveSyncViewModel(private val c: AppContainer) : ViewModel() {
     val state: StateFlow<UiState> = mutableState.asStateFlow()
 
     val isSimulated: Boolean = c.simulator != null
+
+    /** On-device demo AI/execution (no server). Forces the "시뮬레이션" badge on every screen. */
+    val isOfflineDemo: Boolean = c.offlineDemo
     val simulator = c.simulator
 
     // ---- Persisted/server state: observed, never duplicated ----
@@ -146,7 +149,7 @@ class DriveSyncViewModel(private val c: AppContainer) : ViewModel() {
 
     private suspend fun bootstrap() {
         if (c.visits.isEmpty()) c.visits.seed(DemoSeed.customers, DemoSeed.visits(System.currentTimeMillis()))
-        if (c.auth.accessToken() == null && BuildConfig.DEMO_EMAIL.isNotEmpty()) {
+        if (!c.offlineDemo && c.auth.accessToken() == null && BuildConfig.DEMO_EMAIL.isNotEmpty()) {
             c.auth.signIn(BuildConfig.DEMO_EMAIL, BuildConfig.DEMO_PASSWORD)
         }
         c.sessionSnapshots.load()?.let { (sessionId, snapshot) ->

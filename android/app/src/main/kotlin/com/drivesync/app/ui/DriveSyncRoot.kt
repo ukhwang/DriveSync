@@ -55,7 +55,7 @@ fun DriveSyncRoot(vm: DriveSyncViewModel) {
     val insight by vm.insight.collectAsStateWithLifecycle()
     val actions by vm.actions.collectAsStateWithLifecycle()
 
-    val simulated = ui.vehicle?.origin == DataOrigin.SIMULATED
+    val simulated = ui.vehicle?.origin == DataOrigin.SIMULATED || vm.isOfflineDemo
     val phase = ui.session.phase
 
     Row(Modifier.fillMaxSize().background(DS.Bg).safeDrawingPadding()) {

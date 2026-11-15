@@ -285,7 +285,7 @@ private fun ActionCard(
             Text("실패 원인: $it", color = DS.Danger, style = MaterialTheme.typography.bodyMedium)
         }
         action.log.lastOrNull()?.takeIf { action.status == ActionStatus.EXECUTED }?.let {
-            Text("서버 결과: ${it.message}", color = DS.Success, style = MaterialTheme.typography.bodyMedium)
+            Text("실행 결과: ${it.message}", color = DS.Success, style = MaterialTheme.typography.bodyMedium)
         }
         Row(horizontalArrangement = Arrangement.spacedBy(DS.Gap)) {
             when (action.status) {

@@ -6,9 +6,12 @@ import com.drivesync.app.vehicle.CarApiVehicleContextSource
 import com.drivesync.core.action.ActionEngine
 import com.drivesync.core.ai.AiGateway
 import com.drivesync.core.ai.AuthSession
+import com.drivesync.core.ai.DemoVisitContext
 import com.drivesync.core.ai.EdgeFunctionAiGateway
 import com.drivesync.core.ai.EdgeFunctionClient
 import com.drivesync.core.ai.HttpActionExecutor
+import com.drivesync.core.ai.OfflineDemoAiGateway
+import com.drivesync.core.ai.SimulatedActionExecutor
 import com.drivesync.core.ai.SupabaseAuth
 import com.drivesync.core.ai.TokenStorage
 import com.drivesync.core.data.DriveSyncDatabase
@@ -24,6 +27,7 @@ import com.drivesync.core.vehicle.MockVehicleContextSource
 import com.drivesync.core.vehicle.VehicleContextSource
 import com.drivesync.core.voice.AndroidSpeechInput
 import com.drivesync.core.voice.AndroidSpeechOutput
+import kotlinx.coroutines.flow.first
 import kotlinx.serialization.json.Json
 import okhttp3.OkHttpClient
 import java.util.concurrent.TimeUnit
@@ -66,17 +70,41 @@ class AppContainer(context: Context) {
         http = http,
     )
 
-    val ai: AiGateway = EdgeFunctionAiGateway(edgeClient)
-    val actionStore = RoomActionStore(database.actions())
-    val actionEngine = ActionEngine(actionStore, HttpActionExecutor(edgeClient))
-
     val visits = VisitRepository(database)
+
+    /**
+     * No server configured (e.g. the contest release APK): AI and execution run as an on-device,
+     * schema-validated demo built from fictional seed data. Nothing leaves the device and every
+     * screen shows the "시뮬레이션" badge. With SUPABASE_URL set, the real Edge Functions are used.
+     */
+    val offlineDemo: Boolean = BuildConfig.SUPABASE_URL.isEmpty()
+
+    val ai: AiGateway =
+        if (offlineDemo) OfflineDemoAiGateway { visitId -> demoContext(visitId) } else EdgeFunctionAiGateway(edgeClient)
+    val actionStore = RoomActionStore(database.actions())
+    val actionEngine = ActionEngine(
+        actionStore,
+        if (offlineDemo) SimulatedActionExecutor() else HttpActionExecutor(edgeClient),
+    )
+
     val notes = NoteRepository(database.notes())
     val insights = InsightRepository(database.insights())
     val sessionSnapshots = SessionSnapshotRepository(database.sessionSnapshots())
 
     val speechOutput = AndroidSpeechOutput(appContext)
     val speechInput = AndroidSpeechInput(appContext)
+
+    private suspend fun demoContext(visitId: String): DemoVisitContext? {
+        val visit = visits.visit(visitId) ?: return null
+        val customer = visits.observeCustomer(visit.customerId).first() ?: return null
+        return DemoVisitContext(
+            companyName = customer.companyName,
+            contactName = customer.contactName,
+            contactEmail = customer.contactEmail,
+            historySummary = customer.historySummary,
+            purpose = visit.purpose,
+        )
+    }
 }
 
 private class KeystoreTokenStorage(private val secrets: KeystoreSecretStore) : TokenStorage {
